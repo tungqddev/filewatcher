@@ -1,0 +1,16 @@
+C:\MyProjects\MyToolbox\FileSystemWatcher\bin\Release\FileSystemWatcher.exe
+C:\MyProjects\MyToolbox\FileSystemWatcher\bin\Release\FileSystemWatcher.pdb
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\ResolveAssemblyReference.cache
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\FileChangeNotifier.frmNotifier.resources
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\FileSystemWatcher.Properties.Resources.resources
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\FileChangeNotifier.csproj.GenerateResource.Cache
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\FileSystemWatcher.exe
+C:\MyProjects\MyToolbox\FileSystemWatcher\obj\Release\FileSystemWatcher.pdb
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileSystemWatcher.exe
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileSystemWatcher.pdb
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\bin\Release\FileSystemWatcher.exe
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\bin\Release\FileSystemWatcher.pdb
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileChangeNotifier.frmNotifier.resources
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileSystemWatcher.Properties.Resources.resources
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileChangeNotifier.csproj.GenerateResource.Cache
+C:\Users\tquach1.USOL-V\Documents\Visual Studio 2015\Projects\FileSystemWatcher\obj\Release\FileChangeNotifier.csprojResolveAssemblyReference.cache
