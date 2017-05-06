@@ -95,6 +95,7 @@ namespace FileChangeNotifier
                 m_Watcher.Deleted += new FileSystemEventHandler(OnChanged);
                 m_Watcher.Renamed += new RenamedEventHandler(OnRenamed);
                 m_Watcher.EnableRaisingEvents = true;
+
             }
         }
 
@@ -113,7 +114,7 @@ namespace FileChangeNotifier
                 trayIcon.ShowBalloonTip(5000, "Warning", m_Sb.ToString(), ToolTipIcon.Info);
 
                 //map newst file from server to local
-                fileCopy(e.FullPath, destRootPath);
+                //fileCopy(e.FullPath, destRootPath);
 
             }
         }
@@ -140,8 +141,8 @@ namespace FileChangeNotifier
                     trayIcon.ShowBalloonTip(5000, "Warning", m_Sb.ToString(), ToolTipIcon.Info);
 
                     //map newst file from server to local
-                    File.Delete(e.OldFullPath);
-                    fileCopy(e.Name, destRootPath);
+                    //File.Delete(e.OldFullPath);
+                    //fileCopy(e.Name, destRootPath);
                 }
             }
         }
@@ -287,6 +288,20 @@ namespace FileChangeNotifier
                     MessageBox.Show(ex.ToString());
                     return;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Show messagebox of content when you double click to list box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lstNotification_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            int index = this.lstNotification.IndexFromPoint(e.Location);
+            if (index != System.Windows.Forms.ListBox.NoMatches)
+            {
+                MessageBox.Show(lstNotification.Items[index].ToString(), "Message content");
             }
         }
     }

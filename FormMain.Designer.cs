@@ -85,6 +85,7 @@ namespace FileChangeNotifier
             this.lstNotification.Name = "lstNotification";
             this.lstNotification.Size = new System.Drawing.Size(461, 225);
             this.lstNotification.TabIndex = 5;
+            this.lstNotification.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lstNotification_MouseDoubleClick);
             // 
             // label3
             // 
