@@ -357,6 +357,11 @@ namespace FileChangeNotifier
             }
         }
 
+        /// <summary>
+        /// check if in case file in another process
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         static bool IsFileLocked(FileInfo file)
         {
             FileStream stream = null;
