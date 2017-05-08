@@ -6,12 +6,14 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace FileChangeNotifier
 {
     public partial class frmNotifier : Form
     {
         private StringBuilder m_Sb;
+        private StringBuilder textcontent;
         private bool m_bDirty;
         private System.IO.FileSystemWatcher m_Watcher;
         private bool m_bIsWatching;
@@ -21,6 +23,8 @@ namespace FileChangeNotifier
         {
             InitializeComponent();
             m_Sb = new StringBuilder();
+            textcontent = new StringBuilder();
+            textcontent.Append(string.Empty);
             m_bDirty = false;
             m_bIsWatching = false;
 
@@ -88,19 +92,36 @@ namespace FileChangeNotifier
                     m_Watcher.IncludeSubdirectories = true;
                 }
 
-                m_Watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
+                m_Watcher.NotifyFilter = NotifyFilters.LastWrite
                                      | NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.CreationTime;
                 m_Watcher.Changed += new FileSystemEventHandler(OnChanged);
                 m_Watcher.Created += new FileSystemEventHandler(OnChanged);
                 m_Watcher.Deleted += new FileSystemEventHandler(OnChanged);
                 m_Watcher.Renamed += new RenamedEventHandler(OnRenamed);
                 m_Watcher.EnableRaisingEvents = true;
-
             }
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            textcontent.Remove(0, textcontent.Length);
+            textcontent.Append(e.FullPath.ToString());
+            string fullpath = e.FullPath.ToString();
+            string fullpath2 = "";
+            FileAttributes attr = File.GetAttributes(fullpath);
+            if (!((attr & FileAttributes.Directory) == FileAttributes.Directory))
+            {
+                if (String.Compare(fullpath2, fullpath) != 0)
+                {
+                    fileCopy(fullpath, destRootPath);
+                    fullpath2 = fullpath;
+                }
+            }
+            textcontent.Append(Environment.NewLine);
+            using (StreamWriter sw = File.AppendText(@"D:\2016 projects\LEASE\LEASE201612\stuff\bridge_stuff\20170504\textfile\demo.TXT"))
+            {
+                sw.WriteLine(textcontent.ToString());
+            }
             if (!m_bDirty)
             {
                 m_Sb.Remove(0, m_Sb.Length);
@@ -112,15 +133,21 @@ namespace FileChangeNotifier
                 m_bDirty = true;
                 trayIcon.Visible = true;
                 trayIcon.ShowBalloonTip(5000, "Warning", m_Sb.ToString(), ToolTipIcon.Info);
-
                 //map newst file from server to local
                 //fileCopy(e.FullPath, destRootPath);
-
             }
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
+            textcontent.Remove(0, textcontent.Length);
+            if (!String.IsNullOrEmpty(e.FullPath))
+                textcontent.Append(e.FullPath.ToString());
+            textcontent.Append(Environment.NewLine);
+            using (StreamWriter sw = File.AppendText(@"D:\2016 projects\LEASE\LEASE201612\stuff\bridge_stuff\20170504\textfile\demo.TXT"))
+            {
+                sw.WriteLine(textcontent.ToString());
+            }
             if (!m_bDirty)
             {
                 m_Sb.Remove(0, m_Sb.Length);
@@ -133,13 +160,13 @@ namespace FileChangeNotifier
                 m_Sb.Append("    ");
                 m_Sb.Append(DateTime.Now.ToString());
                 m_bDirty = true;
+
                 if (rdbFile.Checked)
                 {
                     m_Watcher.Filter = e.Name;
                     m_Watcher.Path = e.FullPath.Substring(0, e.FullPath.Length - m_Watcher.Filter.Length);
                     trayIcon.Visible = true;
                     trayIcon.ShowBalloonTip(5000, "Warning", m_Sb.ToString(), ToolTipIcon.Info);
-
                     //map newst file from server to local
                     //File.Delete(e.OldFullPath);
                     //fileCopy(e.Name, destRootPath);
@@ -209,6 +236,11 @@ namespace FileChangeNotifier
             }
         }
 
+        /// <summary>
+        /// File watching mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void rdbFile_CheckedChanged(object sender, EventArgs e)
         {
             if (rdbFile.Checked == true)
@@ -218,6 +250,11 @@ namespace FileChangeNotifier
             }
         }
 
+        /// <summary>
+        /// Directory watching mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void rdbDir_CheckedChanged(object sender, EventArgs e)
         {
             if (rdbDir.Checked == true)
@@ -252,41 +289,56 @@ namespace FileChangeNotifier
         }
 
         /// <summary>
-        /// Copy newsest file to local PC
+        /// Copy file from source path to destioation path
         /// </summary>
         /// <param name="sourcePath"></param>
         /// <param name="destFolderPath"></param>
         private void fileCopy(string sourcePath, string destFolderPath)
         {
-            if(Directory.Exists(sourcePath))
+            FileStream stream = null;
+            //in case path is folder
+            if (Directory.Exists(sourcePath))
             {
                 string[] fileList = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories);
                 foreach (string s in fileList)
                 {
                     try
                     {
-                        destFolderPath = destFolderPath + "\\" + s.Substring(sourcePath.Length -1 , (s.Length - sourcePath.Length));
+                        FileInfo fileinfo = new FileInfo(sourcePath);
+                        destFolderPath = destFolderPath + "\\" + s.Substring(sourcePath.Length - 1, (s.Length - sourcePath.Length));
+                        while(IsFileLocked(fileinfo))
+                        {
+                            Thread.Sleep(500);
+                        }
                         File.Copy(s, destFolderPath, true);
+
                     }
-                    catch (Exception ex)
+                    catch (IOException ex)
                     {
-                        MessageBox.Show(ex.ToString());
+                        MessageBox.Show(ex.Message.ToString());
                         return;
                     }
-                }   
+                }
             }
+
+            // in case path is file 
             else
             {
                 try
                 {
-                   destFolderPath = destFolderPath + "\\" + sourcePath.Substring(sourcePath.IndexOf("wwwroot")+7, (sourcePath.Length - sourcePath.IndexOf("wwwroot") - 7));
-                    File.Copy(sourcePath, destFolderPath , true);
+                    FileInfo fileinfo = new FileInfo(sourcePath);
+                    destFolderPath = destFolderPath + "\\" + sourcePath.Substring(sourcePath.IndexOf("wwwroot") + 7, (sourcePath.Length - sourcePath.IndexOf("wwwroot") - 7));
+                    while (IsFileLocked(fileinfo))
+                    {
+                        Thread.Sleep(500);
+                    }
+                    File.Copy(sourcePath, destFolderPath, true);
                 }
 
-                catch (Exception ex)
+                catch (IOException ex)
                 {
-                    MessageBox.Show(ex.ToString());
-                    return;
+                    MessageBox.Show(ex.Message.ToString());
+                     return;
                 }
             }
         }
@@ -303,6 +355,25 @@ namespace FileChangeNotifier
             {
                 MessageBox.Show(lstNotification.Items[index].ToString(), "Message content");
             }
+        }
+
+        static bool IsFileLocked(FileInfo file)
+        {
+            FileStream stream = null;
+            try
+            {
+                stream = file.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+            }
+            catch (IOException)
+            {
+                return true;
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+            return false;
         }
     }
 }
