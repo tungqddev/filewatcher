@@ -19,6 +19,10 @@ namespace FileChangeNotifier
         private bool m_bIsWatching;
         private NotifyIcon trayIcon;
         private string destRootPath = @"D:\2016 projects\LEASE\LEASE201612\stuff\bridge_stuff\20170504\no2";
+
+        // It will be used at multithread construcstion
+        private List<string> listCopyFile; 
+
         public frmNotifier()
         {
             InitializeComponent();
@@ -27,6 +31,7 @@ namespace FileChangeNotifier
             textcontent.Append(string.Empty);
             m_bDirty = false;
             m_bIsWatching = false;
+            listCopyFile = new List<string>();
 
             // Initialize Tray Icon
             trayIcon = new NotifyIcon()
@@ -60,6 +65,8 @@ namespace FileChangeNotifier
 
         private void btnWatchFile_Click(object sender, EventArgs e)
         {
+
+
             if (m_bIsWatching)
             {
                 m_bIsWatching = false;
@@ -107,13 +114,16 @@ namespace FileChangeNotifier
             textcontent.Remove(0, textcontent.Length);
             textcontent.Append(e.FullPath.ToString());
             string fullpath = e.FullPath.ToString();
+            if(!String.IsNullOrEmpty(fullpath))
+            listCopyFile.Add(fullpath);
+
             string fullpath2 = "";
             FileAttributes attr = File.GetAttributes(fullpath);
             if (!((attr & FileAttributes.Directory) == FileAttributes.Directory))
             {
                 if (String.Compare(fullpath2, fullpath) != 0)
                 {
-                    fileCopy(fullpath, destRootPath);
+                    //fileCopy(fullpath, destRootPath);
                     fullpath2 = fullpath;
                 }
             }
@@ -187,6 +197,16 @@ namespace FileChangeNotifier
                 lstNotification.Items.Add(m_Sb.ToString());
                 lstNotification.EndUpdate();
                 m_bDirty = false;
+                while (listCopyFile.Count > 0)
+                {
+                    //frmNotifier formNotifier = new frmNotifier();
+                    //Thread copyFileThread = new Thread(() => frmNotifier.fileCopy(listCopyFile[0], destRootPath));
+                    //copyFileThread.Start();
+                    //listCopyFile.RemoveAt(0);
+                    //Thread.Sleep(500);
+                    fileCopy(listCopyFile[0], destRootPath);
+                    listCopyFile.RemoveAt(0);
+                }
 
             }
         }
@@ -293,9 +313,8 @@ namespace FileChangeNotifier
         /// </summary>
         /// <param name="sourcePath"></param>
         /// <param name="destFolderPath"></param>
-        private void fileCopy(string sourcePath, string destFolderPath)
+        private static void fileCopy(string sourcePath, string destFolderPath)
         {
-            FileStream stream = null;
             //in case path is folder
             if (Directory.Exists(sourcePath))
             {
@@ -306,10 +325,6 @@ namespace FileChangeNotifier
                     {
                         FileInfo fileinfo = new FileInfo(sourcePath);
                         destFolderPath = destFolderPath + "\\" + s.Substring(sourcePath.Length - 1, (s.Length - sourcePath.Length));
-                        while(IsFileLocked(fileinfo))
-                        {
-                            Thread.Sleep(500);
-                        }
                         File.Copy(s, destFolderPath, true);
 
                     }
@@ -380,5 +395,6 @@ namespace FileChangeNotifier
             }
             return false;
         }
+
     }
 }
